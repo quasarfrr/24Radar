@@ -1,0 +1,9 @@
+{
+  "name": "24radar-prototype",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Local ATC24 radar with live traffic, enroute chart points, and airport ground charts",
+  "main": "server.js",
+  "scripts": {"start": "node server.js"},
+  "engines": {"node": ">=18"}
+}
