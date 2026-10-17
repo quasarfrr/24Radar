@@ -1,45 +1,182 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>24RADAR | ATC24 Scope</title>
-<style>
-:root{color-scheme:dark;--bg:#071014;--panel:#0b191d;--line:#1d4140;--green:#77f5c3;--muted:#8ba9a6;--amber:#ffc978;--red:#ff6f79}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#d9f2e9;font:14px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);background:#091619;flex-wrap:wrap}.brand{font-size:20px;letter-spacing:2px;color:var(--green);font-weight:800}.sub{color:var(--muted);font-size:11px}.status{color:var(--green)}main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;padding:12px;max-width:1600px;margin:auto}.panel{border:1px solid var(--line);background:var(--panel);border-radius:8px;overflow:hidden}.panelhead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--green);font-weight:700}.scope-wrap{position:relative;min-height:500px;height:calc(100vh - 155px);max-height:900px;background:radial-gradient(ellipse at center,#0b2423 0%,#071514 60%,#061012 100%)}canvas{width:100%;height:100%;display:block;cursor:crosshair}.scopehint{position:absolute;bottom:10px;left:12px;color:var(--muted);font-size:10px;pointer-events:none}.toolbar{display:flex;gap:6px;flex-wrap:wrap}.mode.active{background:#164538;border-color:var(--green);color:#fff}.chart-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:9px 12px;background:#081719;border-top:1px solid var(--line)}.chart-controls label{display:flex;align-items:center;gap:5px;color:var(--green)}.chart-controls input{accent-color:#77f5c3}[hidden]{display:none!important}.ground-wrap{height:calc(100vh - 205px);min-height:520px;background:#f4f4f4;color:#071014}.ground-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:9px 12px;background:#091619;color:var(--green)}.ground-top a{color:var(--green);margin-left:auto}.ground-wrap iframe{width:100%;height:calc(100% - 42px);border:0;background:white}.map-results{max-height:240px;overflow:auto}.map-result{display:block;width:100%;text-align:left;padding:8px 12px;border:0;border-top:1px solid #14302e;border-radius:0;background:transparent;color:#d9f2e9}.map-result:hover{background:#12302b}.map-result strong{color:var(--green)}button,input{font:inherit;color:var(--green);background:#0d2425;border:1px solid var(--line);border-radius:5px;padding:6px 9px}button{cursor:pointer}button:hover{border-color:var(--green)}.sidebar{display:flex;flex-direction:column;gap:12px;min-width:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px}.stat{background:#0a1417;border:1px solid #163330;padding:9px;border-radius:5px}.stat b{display:block;color:var(--green);font-size:20px}.stat span{font-size:10px;color:var(--muted)}.search{width:calc(100% - 20px);margin:0 10px 10px}.traffic{overflow:auto;max-height:35vh}.rowitem{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-top:1px solid #14302e;border-radius:0;background:transparent;color:#d9f2e9}.rowitem:hover,.rowitem.selected{background:#12302b}.rowitem strong{color:var(--green)}.rowitem small{display:block;color:var(--muted);margin-top:3px}.details{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.detail{border-bottom:1px solid #183431;padding-bottom:7px}.detail span{display:block;color:var(--muted);font-size:10px}.detail b{overflow-wrap:anywhere}.empty{color:var(--muted);padding:14px}.foot{padding:10px 12px;color:var(--muted);font-size:10px;border-top:1px solid var(--line)}.warn{color:var(--amber)}.emergency{color:var(--red)}@media(max-width:900px){main{grid-template-columns:1fr}.scope-wrap{height:65vh;min-height:380px}.sidebar{display:grid;grid-template-columns:1fr}.traffic{max-height:260px}}
-</style></head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>24RADAR | PTFS Live Map</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #101820;
+      color: #e8f0f7;
+      font: 14px Arial, sans-serif;
+    }
+    header {
+      padding: 16px 22px;
+      background: #182632;
+      border-bottom: 1px solid #344653;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    h1 { margin: 0; font-size: 22px; }
+    #status { color: #65e6a0; }
+    main { padding: 16px; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 16px;
+    }
+    .panel {
+      background: #182632;
+      border: 1px solid #344653;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel h2 {
+      font-size: 15px;
+      padding: 14px;
+      margin: 0;
+      border-bottom: 1px solid #344653;
+    }
+    #map {
+      padding: 8px;
+      min-height: 300px;
+      background: #0b131a;
+    }
+    #map img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    #aircraft-list {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .aircraft {
+      padding: 12px;
+      border-bottom: 1px solid #344653;
+      cursor: pointer;
+    }
+    .aircraft:hover, .aircraft.selected {
+      background: #263d4d;
+    }
+    .callsign { color: #75c9ff; font-weight: bold; }
+    .details { color: #b3c3cf; margin-top: 5px; line-height: 1.6; }
+    #selected {
+      padding: 14px;
+      line-height: 1.8;
+      color: #d6e2eb;
+    }
+    .note {
+      color: #9fb2c0;
+      font-size: 12px;
+      padding: 12px 14px;
+      line-height: 1.5;
+    }
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      #aircraft-list { max-height: 40vh; }
+    }
+  </style>
+</head>
 <body>
-<header><div><div class="brand">◉ 24RADAR</div><div class="sub">ATC24 / PTFS · LOCAL PROTOTYPE v0.4</div></div><div><span id="status" class="status">● CONNECTING</span><div id="updated" class="sub">waiting for API data…</div></div></header>
-<main><section class="panel"><div class="panelhead"><span>RADAR SCOPE <span class="sub">· game-coordinate view</span></span><div class="toolbar"><button id="modeLive" class="mode active">LIVE RADAR</button><button id="modeEnroute" class="mode">ENROUTE MAP</button><button id="modeGround" class="mode">AIRPORT / TAXIWAYS</button><button id="zoomOut">−</button><button id="zoomIn">+</button><button id="fit">FIT</button></div></div><div id="scopeWrap" class="scope-wrap"><canvas id="scope"></canvas><div id="scopeHint" class="scopehint">live aircraft · click a target to select · wheel to zoom · drag to pan</div></div><div id="chartControls" class="chart-controls" hidden><label><input id="showWaypoints" type="checkbox" checked> Waypoints</label><label><input id="showAirports" type="checkbox" checked> Airports</label><span id="mapCount" class="sub">Loading chart data…</span><button id="fitMap">FIT MAP</button></div><div id="groundWrap" class="ground-wrap" hidden><div class="ground-top"><b>PTFS AIRPORT GROUND CHARTS</b><span class="sub">select an airport diagram in the chart viewer</span><a href="https://ptfs.app/charts" target="_blank" rel="noreferrer">Open charts in new tab ↗</a></div><iframe id="groundFrame" title="PTFS airport ground charts including taxiways" src="https://ptfs.app/charts" loading="lazy" referrerpolicy="no-referrer"></iframe></div><div class="foot" id="mapFoot">Live aircraft use raw 24data game coordinates. The enroute chart uses published PTFS chart coordinates; a verified world-to-chart calibration is still needed to combine them on one map.</div></section>
-<aside class="sidebar"><section class="panel"><div class="panelhead">TRAFFIC OVERVIEW</div><div class="stats"><div class="stat"><b id="count">—</b><span>AIRCRAFT</span></div><div class="stat"><b id="airborne">—</b><span>AIRBORNE</span></div><div class="stat"><b id="emergencies">—</b><span>EMERGENCY</span></div></div><input id="search" class="search" placeholder="filter callsign / pilot / type…"><div id="traffic" class="traffic"><div class="empty">waiting for aircraft data…</div></div><div class="foot" id="error">API status: waiting</div></section>
-<section class="panel"><div class="panelhead" id="detailTitle">SELECTED AIRCRAFT</div><div id="details" class="empty">select a radar target or traffic row</div></section>
-<section class="panel"><div class="panelhead">MAP SEARCH</div><input id="mapSearch" class="search" placeholder="find waypoint / airport code…"><div id="mapResults" class="map-results"><div class="empty">switch to ENROUTE MAP to search chart points</div></div><div class="foot">Waypoints and airport positions from the community ATC24 enroute chart dataset.</div></section>
-<section class="panel"><div class="panelhead">HEADING / DISTANCE TOOL</div><div style="padding:12px"><div class="sub">select two aircraft from the list to compare positions</div><div id="measure" style="margin-top:8px;color:var(--green)">select a first aircraft</div><div class="toolbar" style="margin-top:10px"><button id="setA">SET POINT A</button><button id="setB">SET POINT B</button><button id="clearMeasure">CLEAR</button></div></div></section></aside></main>
-<script src="https://cdn.jsdelivr.net/gh/DayzdRB/PTFSFlightPlanner@main/data/catalog.js"></script>
-<script>
-const $=id=>document.getElementById(id), canvas=$('scope'), ctx=canvas.getContext('2d');let aircraft=[],selected=null,zoom=1,panX=0,panY=0,drag=null,pointA=null,pointB=null,mode='live',chartPoints=[],chartSelected=null,showWaypoints=true,showAirports=true;const chartImage=new Image();chartImage.crossOrigin='anonymous';chartImage.src='https://raw.githubusercontent.com/DayzdRB/PTFSFlightPlanner/main/assets/enroute-chart.png';chartImage.onload=()=>{if(mode==='enroute')draw()};
-function loadChartPoints(){const d=window.PTFS_DATA||{},raw=window.ATC24_MAP_DATA||{};const airports=Object.entries(d.airports||{}).map(([code,a])=>({kind:'airport',code,name:a.name||code,x:Number(a.x),y:Number(a.y),region:a.region,runways:a.runways||[],frequencies:a.frequencies||[]})).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));const waypoints=Object.entries(raw.WAYPOINTS||{}).map(([code,p])=>({kind:'waypoint',code,name:code,x:Number(p.x)*2048,y:Number(p.y)*2048-204})).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));chartPoints=[...airports,...waypoints];$('mapCount').textContent=`${waypoints.length} waypoints · ${airports.length} airports`;renderMapResults();if(mode==='enroute')draw()}
-loadChartPoints();
-const fmt=n=>Number.isFinite(Number(n))?Math.round(Number(n)).toLocaleString('en-US'):'—';
-function resize(){const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=Math.max(1,Math.round(r.width*d));canvas.height=Math.max(1,Math.round(r.height*d));ctx.setTransform(d,0,0,d,0,0);draw()}window.addEventListener('resize',resize);
-function view(){const w=canvas.clientWidth,h=canvas.clientHeight;return {w,h,cx:w/2+panX,cy:h/2+panY,scale:Math.min(w,h)/850*zoom}}
-function xy(a){const v=view();return {x:v.cx+a.x*v.scale,y:v.cy-a.y*v.scale}}
-function draw(){if(mode==='enroute'){drawEnroute();return}const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;ctx.clearRect(0,0,w,h);const v=view(),radius=Math.min(w,h)*.44;ctx.save();ctx.translate(v.cx,v.cy);ctx.strokeStyle='rgba(91,211,164,.16)';ctx.lineWidth=1;for(let i=1;i<=4;i++){ctx.beginPath();ctx.arc(0,0,radius*i/4,0,Math.PI*2);ctx.stroke()}ctx.beginPath();ctx.moveTo(-w,0);ctx.lineTo(w,0);ctx.moveTo(0,-h);ctx.lineTo(0,h);ctx.stroke();ctx.fillStyle='rgba(140,210,180,.65)';ctx.font='10px monospace';ctx.fillText('N ↑ (provisional)',8,-h/2+18);ctx.restore();
-for(const a of aircraft){const p=xy(a);if(p.x<-35||p.x>w+35||p.y<-35||p.y>h+35)continue;const isSel=selected===a.callsign;ctx.save();ctx.translate(p.x,p.y);ctx.rotate((a.heading||0)*Math.PI/180);ctx.strokeStyle=a.isEmergencyOccuring?'#ff6f79':(a.isOnGround?'#ffc978':'#77f5c3');ctx.fillStyle=ctx.strokeStyle;ctx.lineWidth=isSel?2:1.3;ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.stroke();ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(0,15);ctx.stroke();ctx.restore();ctx.fillStyle=isSel?'#ffffff':(a.isEmergencyOccuring?'#ff9da4':'#baf9dc');ctx.font=isSel?'bold 11px monospace':'10px monospace';ctx.fillText(a.callsign,p.x+8,p.y-7);ctx.fillStyle='#86aaa0';ctx.font='9px monospace';ctx.fillText(`${fmt(a.altitude)} · ${fmt(a.heading)}°`,p.x+8,p.y+5)}
-if(pointA&&pointB){const a=xy(pointA),b=xy(pointB);ctx.strokeStyle='#ffc978';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([])} }
-function chartView(){const w=canvas.clientWidth,h=canvas.clientHeight,scale=Math.min(w/2048,h/1692)*zoom;return {w,h,scale,ox:(w-2048*scale)/2+panX,oy:(h-1692*scale)/2+panY}}
-function chartXY(p,v){return {x:v.ox+p.x*v.scale,y:v.oy+p.y*v.scale}}
-function drawEnroute(){const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;ctx.clearRect(0,0,w,h);ctx.fillStyle='#071514';ctx.fillRect(0,0,w,h);const v=chartView();if(chartImage.complete&&chartImage.naturalWidth){ctx.drawImage(chartImage,v.ox,v.oy,2048*v.scale,1692*v.scale)}else{ctx.fillStyle='#8ba9a6';ctx.font='13px monospace';ctx.fillText('Loading PTFS enroute chart…',20,30)}for(const p of chartPoints){if(p.kind==='waypoint'&&!showWaypoints||p.kind==='airport'&&!showAirports)continue;const q=chartXY(p,v);if(q.x<-20||q.y<-20||q.x>w+20||q.y>h+20)continue;const isSel=chartSelected&&chartSelected.kind===p.kind&&chartSelected.code===p.code;ctx.beginPath();if(p.kind==='airport'){ctx.rect(q.x-4,q.y-4,8,8);ctx.fillStyle=isSel?'#fff':'#ffc978';ctx.fill();ctx.strokeStyle='#302719';ctx.stroke()}else{ctx.arc(q.x,q.y,isSel?4:2.4,0,Math.PI*2);ctx.fillStyle=isSel?'#fff':'#6fffd0';ctx.fill()}if(p.kind==='airport'||zoom>1.15||isSel){ctx.font=p.kind==='airport'?'bold 10px monospace':'9px monospace';ctx.lineWidth=3;ctx.strokeStyle='rgba(4,15,16,.85)';ctx.strokeText(p.code,q.x+6,q.y-5);ctx.fillStyle=p.kind==='airport'?'#ffe0a4':'#d7fff0';ctx.fillText(p.code,q.x+6,q.y-5)}}if(chartSelected){const q=chartXY(chartSelected,v);ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(q.x,q.y,9,0,Math.PI*2);ctx.stroke()}}
-function renderMapResults(){const q=($('mapSearch')?.value||'').trim().toUpperCase();const items=chartPoints.filter(p=>`${p.code} ${p.name}`.toUpperCase().includes(q)).slice(0,30);$('mapResults').innerHTML=items.map(p=>`<button class="map-result" data-map-code="${esc(p.code)}" data-map-kind="${p.kind}"><strong>${esc(p.code)}</strong><small style="display:block;color:var(--muted)">${esc(p.name)} · ${p.kind==='airport'?'AIRPORT':'WAYPOINT'}</small></button>`).join('')||'<div class="empty">no matching chart points</div>';document.querySelectorAll('[data-map-code]').forEach(b=>b.addEventListener('click',()=>{chartSelected=chartPoints.find(p=>p.code===b.dataset.mapCode&&p.kind===b.dataset.mapKind)||null;mode='enroute';setModeUI();zoom=2.2;const v=chartView(),q=chartXY(chartSelected,v);panX+=canvas.clientWidth/2-q.x;panY+=canvas.clientHeight/2-q.y;renderChartDetails();draw()}))}
-function renderChartDetails(){if(!chartSelected)return;$('detailTitle').textContent=chartSelected.kind==='airport'?'SELECTED AIRPORT':'SELECTED WAYPOINT';const p=chartSelected;const rows=p.kind==='airport'?[['CODE',p.code],['AIRPORT',p.name],['REGION',p.region||'—'],['RUNWAYS',(p.runways||[]).join(', ')||'Not listed'],['FREQUENCIES',(p.frequencies||[]).map(f=>f.join(' ')).join(' · ')||'Not listed']]:[['WAYPOINT',p.code],['CHART X',Math.round(p.x)],['CHART Y',Math.round(p.y)]];$('details').innerHTML='<div class="details">'+rows.map(([k,v])=>`<div class="detail"><span>${k}</span><b>${esc(v)}</b></div>`).join('')+'</div>'}
-function setModeUI(){const live=mode==='live',enroute=mode==='enroute',ground=mode==='ground';$('modeLive').classList.toggle('active',live);$('modeEnroute').classList.toggle('active',enroute);$('modeGround').classList.toggle('active',ground);$('scopeWrap').hidden=ground;$('chartControls').hidden=!enroute;$('groundWrap').hidden=!ground;$('zoomIn').hidden=ground;$('zoomOut').hidden=ground;$('fit').hidden=ground;$('scopeHint').textContent=live?'live aircraft · click a target to select · wheel to zoom · drag to pan': 'PTFS enroute chart · click an airport / waypoint · wheel to zoom · drag to pan';$('mapFoot').textContent=live?'Live aircraft use raw 24data game coordinates. The enroute chart uses published PTFS chart coordinates; a verified world-to-chart calibration is still needed to combine them on one map.':enroute?'PTFS chart points are from the community ATC24 map dataset. Live aircraft are kept on the live scope because the 24data-to-chart coordinate transform is not yet verified.':'Ground charts are provided by PTFS Charts and include airport taxiways, runways, and apron layouts.';if(enroute)renderMapResults();if(live)renderDetails();else if(enroute&&chartSelected)renderChartDetails();draw()}
-$('modeLive').onclick=()=>{mode='live';setModeUI()};$('modeEnroute').onclick=()=>{mode='enroute';setModeUI()};$('modeGround').onclick=()=>{mode='ground';setModeUI()};$('showWaypoints').onchange=e=>{showWaypoints=e.target.checked;draw()};$('showAirports').onchange=e=>{showAirports=e.target.checked;draw()};$('fitMap').onclick=()=>{zoom=1;panX=0;panY=0;draw()};$('mapSearch').addEventListener('input',renderMapResults);
-function select(c){selected=c;renderTraffic();renderDetails();draw()}
-function renderTraffic(){const q=$('search').value.toLowerCase();const list=aircraft.filter(a=>`${a.callsign} ${a.playerName} ${a.aircraftType}`.toLowerCase().includes(q)).sort((a,b)=>a.callsign.localeCompare(b.callsign));$('traffic').innerHTML=list.map(a=>`<button class="rowitem ${selected===a.callsign?'selected':''}" data-callsign="${esc(a.callsign)}"><strong>${esc(a.callsign)}</strong>${a.isEmergencyOccuring?' <span class="emergency">EMERGENCY</span>':''}<small>${esc(a.aircraftType)} · ${a.isOnGround?'GROUND':fmt(a.altitude)+' ft'} · HDG ${fmt(a.heading)}°</small><small>${esc(a.playerName)}</small></button>`).join('')||'<div class="empty">no matching aircraft</div>';document.querySelectorAll('[data-callsign]').forEach(b=>b.addEventListener('click',()=>select(b.dataset.callsign)))}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderDetails(){if(mode==='enroute'&&chartSelected){renderChartDetails();return}$('detailTitle').textContent='SELECTED AIRCRAFT';const a=aircraft.find(a=>a.callsign===selected);if(!a){$('details').innerHTML='<div class="empty">select a radar target or traffic row</div>';return}const rows=[['CALLSIGN',a.callsign],['PILOT',a.playerName],['AIRCRAFT',a.aircraftType],['ALTITUDE',fmt(a.altitude)+' ft'],['HEADING',fmt(a.heading)+'°'],['SPEED',fmt(a.speed)],['GROUND SPEED',fmt(a.groundSpeed)],['STATUS',a.isOnGround?'ON GROUND':'AIRBORNE'],['POSITION X',fmt(a.x)],['POSITION Y',fmt(a.y)],['EMERGENCY',a.isEmergencyOccuring?'YES':'NO']];$('details').innerHTML='<div class="details">'+rows.map(([k,v])=>`<div class="detail"><span>${k}</span><b>${esc(v)}</b></div>`).join('')+'</div>'}
-function updateMeasure(){if(pointA&&pointB){const dx=pointB.x-pointA.x,dy=pointB.y-pointA.y,dist=Math.hypot(dx,dy),bearing=(Math.atan2(dx,dy)*180/Math.PI+360)%360;$('measure').textContent=`${pointA.callsign} → ${pointB.callsign}: ${dist.toFixed(1)} game units · bearing ${Math.round(bearing)}° (coordinate-based; needs PTFS calibration)`}else if(pointA)$('measure').textContent=`A: ${pointA.callsign} · choose B`;else $('measure').textContent='select an aircraft, then set point A and point B';draw()}
-async function poll(){try{const r=await fetch('/api/state',{cache:'no-store'});if(!r.ok)throw Error('local server HTTP '+r.status);const data=await r.json();aircraft=Array.isArray(data.aircraft)?data.aircraft:[];$('status').textContent=data.error?'● API ISSUE':'● LIVE FEED';$('status').style.color=data.error?'var(--amber)':'var(--green)';$('updated').textContent=data.updatedAt?'API update: '+new Date(data.updatedAt).toLocaleTimeString():'waiting for API timestamp';$('count').textContent=aircraft.length;$('airborne').textContent=aircraft.filter(a=>!a.isOnGround).length;$('emergencies').textContent=aircraft.filter(a=>a.isEmergencyOccuring).length;$('error').textContent=data.error?'API status: '+data.error:`API OK · ${data.controllers?.length||0} controller positions received`;$('error').className='foot'+(data.error?' warn':'');if(selected&&!aircraft.some(a=>a.callsign===selected))selected=null;renderTraffic();renderDetails();updateMeasure()}catch(e){$('status').textContent='● LOCAL SERVER ISSUE';$('error').textContent=e.message} }
-canvas.addEventListener('click',e=>{if(mode==='enroute'){const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,v=chartView();let best=null,bd=13;for(const p of chartPoints){if(p.kind==='waypoint'&&!showWaypoints||p.kind==='airport'&&!showAirports)continue;const q=chartXY(p,v),d=Math.hypot(q.x-mx,q.y-my);if(d<bd){best=p;bd=d}}if(best){chartSelected=best;renderChartDetails();renderMapResults();draw()}return}if(mode!=='live')return;const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=20;for(const a of aircraft){const p=xy(a),d=Math.hypot(p.x-mx,p.y-my);if(d<bd){best=a;bd=d}}if(best)select(best.callsign)});
-canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.25,Math.min(8,zoom*(e.deltaY<0?1.15:.87)));draw()},{passive:false});canvas.addEventListener('pointerdown',e=>{if(e.button===0){drag={x:e.clientX,y:e.clientY,px:panX,py:panY};canvas.setPointerCapture(e.pointerId)}});canvas.addEventListener('pointermove',e=>{if(drag&&(e.buttons===1)){panX=drag.px+e.clientX-drag.x;panY=drag.py+e.clientY-drag.y;draw()}});canvas.addEventListener('pointerup',()=>drag=null);
-$('zoomIn').onclick=()=>{zoom=Math.min(8,zoom*1.25);draw()};$('zoomOut').onclick=()=>{zoom=Math.max(.25,zoom/1.25);draw()};$('fit').onclick=()=>{zoom=1;panX=0;panY=0;if(mode==='enroute'){draw();return}if(aircraft.length){const xs=aircraft.map(a=>a.x),ys=aircraft.map(a=>a.y),cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2;const range=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys),1000);zoom=Math.min(2,Math.min(canvas.clientWidth,canvas.clientHeight)*.7/850*850/range*850/Math.min(canvas.clientWidth,canvas.clientHeight));const v=view();panX=-cx*v.scale;panY=cy*v.scale}draw()};$('search').addEventListener('input',renderTraffic);$('setA').onclick=()=>{pointA=aircraft.find(a=>a.callsign===selected)||null;updateMeasure()};$('setB').onclick=()=>{pointB=aircraft.find(a=>a.callsign===selected)||null;updateMeasure()};$('clearMeasure').onclick=()=>{pointA=pointB=null;updateMeasure()};
-resize();poll();setInterval(poll,1500);
-</script></body></html>
+  <header>
+    <h1>✈ 24RADAR</h1>
+    <span id="status">Connecting…</span>
+  </header>
+
+  <main>
+    <div class="layout">
+      <section class="panel">
+        <h2>PTFS WORLD MAP</h2>
+        <div id="map">
+          <img src="/enroute-chart.png"
+               alt="PTFS en-route chart"
+               onerror="this.alt='Map image could not load';">
+        </div>
+        <div class="note">
+          Map loaded as the base chart. Aircraft-to-map coordinate
+          calibration is the next step, so aircraft positions are not
+          drawn on the chart yet.
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>LIVE AIRCRAFT · <span id="count">0</span></h2>
+        <div id="aircraft-list">Loading aircraft…</div>
+        <div id="selected">Select an aircraft to view its details.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const list = document.getElementById('aircraft-list');
+    const status = document.getElementById('status');
+    const count = document.getElementById('count');
+    const selected = document.getElementById('selected');
+    let selectedCallsign = null;
+
+    function safe(value) {
+      const el = document.createElement('span');
+      el.textContent = String(value ?? 'Unknown');
+      return el.innerHTML;
+    }
+
+    async function refresh() {
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        const aircraft = data.aircraft || [];
+
+        status.textContent = '● LIVE · Updated ' +
+          new Date().toLocaleTimeString();
+        count.textContent = aircraft.length;
+
+        list.innerHTML = '';
+        for (const a of aircraft) {
+          const row = document.createElement('div');
+          row.className = 'aircraft' +
+            (a.callsign === selectedCallsign ? ' selected' : '');
+
+          row.innerHTML =
+            '<div class="callsign">' + safe(a.callsign) + '</div>' +
+            '<div class="details">' +
+            safe(a.aircraftType) + '<br>' +
+            'Altitude: ' + safe(a.altitude) + '<br>' +
+            'Speed: ' + safe(a.speed) + '<br>' +
+            'Heading: ' + safe(a.heading) +
+            '</div>';
+
+          row.addEventListener('click', () => {
+            selectedCallsign = a.callsign;
+            selected.innerHTML =
+              '<strong>' + safe(a.callsign) + '</strong><br>' +
+              'Pilot: ' + safe(a.playerName) + '<br>' +
+              'Aircraft: ' + safe(a.aircraftType) + '<br>' +
+              'Altitude: ' + safe(a.altitude) + '<br>' +
+              'Speed: ' + safe(a.speed) + '<br>' +
+              'Heading: ' + safe(a.heading) + '°<br>' +
+              'Position X: ' + safe(a.x) + '<br>' +
+              'Position Y: ' + safe(a.y);
+            refresh();
+          });
+          list.appendChild(row);
+        }
+
+        if (!aircraft.length) list.textContent = 'No aircraft reported.';
+      } catch (error) {
+        status.textContent = 'Connection error';
+        list.textContent = 'Could not load live aircraft. Retrying…';
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>
